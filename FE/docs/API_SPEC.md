@@ -31,11 +31,9 @@ Auth header injected automatically from AuthContext.
 
 | Function | Method | BE Endpoint | Request | Response |
 |----------|--------|-------------|---------|----------|
-| `login` | POST | `/auth/login` | `LoginRequest` | `TokenResponse` |
-| `register` | POST | `/auth/register` | `RegisterRequest` | `UserResponse` |
-| `refresh` | POST | `/auth/refresh` | — (cookie auto) | `TokenResponse` |
-| `logout` | POST | `/auth/logout` | — | `null` |
+| `login` | POST | `/auth/login` | `LoginRequest` | `AuthUser` (session cookie) |
 | `getMe` | GET | `/auth/me` | — | `AuthUser` |
+| `logout` | POST | `/auth/logout` | — | `null` |
 
 ### Notes
 - Login: store `accessToken` in AuthContext, refresh cookie set by BE automatically
@@ -48,11 +46,28 @@ Auth header injected automatically from AuthContext.
 
 | Function | Method | BE Endpoint | Request | Response |
 |----------|--------|-------------|---------|----------|
-| `getAll` | GET | `/users?page&size&sort` | — | `PaginatedResult<UserResponse>` |
+| `getAll` | GET | `/users?page&size&sort&active` | — | `PaginatedResult<UserResponse>` |
 | `getById` | GET | `/users/{id}` | — | `UserResponse` |
 | `create` | POST | `/users` | `CreateUserRequest` | `UserResponse` |
 | `update` | PUT | `/users` | `UpdateUserRequest` | `UserResponse` |
-| `delete` | DELETE | `/users/{id}` | — | `null` |
+| `disable` | DELETE | `/users/{id}` | — | `UserResponse` (`active=false`) |
+| `enable` | POST | `/users/{id}/enable` | — | `UserResponse` (`active=true`) |
+
+---
+
+## 2b. Cashbook Service — `src/features/cashbook/services/cashbookService.ts`
+
+| Function | Method | BE Endpoint | Request | Response |
+|----------|--------|-------------|---------|----------|
+| `getAll` | GET | `/cashbook?...filters` | — | `PaginatedResult<CashEntryResponse>` |
+| `getStats` | GET | `/cashbook/stats?...` | — | `CashStatsResponse` |
+| `listCategories` | GET | `/cashbook/categories` | — | `CategorySummary[]` |
+| `getById` | GET | `/cashbook/{id}` | — | `CashEntryResponse` |
+| `createManual` | POST | `/cashbook` | `CreateManualCashEntryRequest` | `CashEntryResponse` (201) |
+| `updateNote` | PATCH | `/cashbook/{id}/note` | `{ note }` | `CashEntryResponse` |
+| `updateChecked` | PATCH | `/cashbook/{id}/checked` | `{ checked }` | `CashEntryResponse` |
+| `delete` | DELETE | `/cashbook/{id}` | — | `204` |
+| `exportPdf` | GET | `/cashbook/export/pdf?...` | — | PDF blob download |
 
 ---
 
@@ -60,11 +75,82 @@ Auth header injected automatically from AuthContext.
 
 | Function | Method | BE Endpoint | Request | Response |
 |----------|--------|-------------|---------|----------|
-| `getAll` | GET | `/companies?page&size&sort` | — | `PaginatedResult<CompanyResponse>` |
+| `getAll` | GET | `/companies?page&size&sort&active` | — | `PaginatedResult<CompanyResponse>` |
 | `getById` | GET | `/companies/{id}` | — | `CompanyResponse` |
-| `create` | POST | `/companies` | `CreateCompanyRequest` | `CompanyResponse` |
+| `create` | POST | `/companies` | `CreateCompanyRequest` | `CompanyResponse` (201) |
 | `update` | PUT | `/companies` | `UpdateCompanyRequest` | `CompanyResponse` |
-| `delete` | DELETE | `/companies/{id}` | — | `null` |
+| `disable` | DELETE | `/companies/{id}` | — | `CompanyResponse` (`active=false`) |
+| `enable` | POST | `/companies/{id}/enable` | — | `CompanyResponse` (`active=true`) |
+
+---
+
+## 3b. Customer Service — `src/features/customer/services/customerService.ts`
+
+| Function | Method | BE Endpoint | Request | Response |
+|----------|--------|-------------|---------|----------|
+| `getAll` | GET | `/customers?page&size&sort&active&q` | — | `PaginatedResult<CustomerResponse>` |
+| `getById` | GET | `/customers/{id}` | — | `CustomerResponse` |
+| `create` | POST | `/customers` | `CreateCustomerRequest` | `CustomerResponse` (201) |
+| `update` | PUT | `/customers` | `UpdateCustomerRequest` | `CustomerResponse` |
+| `disable` | DELETE | `/customers/{id}` | — | `CustomerResponse` (`active=false`) |
+| `enable` | POST | `/customers/{id}/enable` | — | `CustomerResponse` (`active=true`) |
+
+---
+
+## 3c. Worker Service — `src/features/worker/services/workerService.ts`
+
+| Function | Method | BE Endpoint | Request | Response |
+|----------|--------|-------------|---------|----------|
+| `getAll` | GET | `/workers?page&size&sort&active&q` | — | `PaginatedResult<WorkerResponse>` |
+| `getById` | GET | `/workers/{id}` | — | `WorkerResponse` |
+| `create` | POST | `/workers` | `CreateWorkerRequest` | `WorkerResponse` (201) |
+| `update` | PUT | `/workers` | `UpdateWorkerRequest` | `WorkerResponse` |
+| `disable` | DELETE | `/workers/{id}` | — | `WorkerResponse` |
+| `enable` | POST | `/workers/{id}/enable` | — | `WorkerResponse` |
+
+---
+
+## 3d. Wage Service — `src/features/wage/services/wageService.ts`
+
+| Function | Method | BE Endpoint | Request | Response |
+|----------|--------|-------------|---------|----------|
+| `getAll` | GET | `/wages?page&size&sort&workerId&unpaidOnly` | — | `PaginatedResult<WageEntryResponse>` |
+| `create` | POST | `/wages` | `CreateWageEntryRequest` | `WageEntryResponse` (201) |
+| `update` | PUT | `/wages` | `UpdateWageEntryRequest` | `WageEntryResponse` |
+| `delete` | DELETE | `/wages/{id}` | — | `204` |
+
+---
+
+## 3e. Debt Service — `src/features/debt/services/debtService.ts`
+
+| Function | Method | BE Endpoint | Request | Response |
+|----------|--------|-------------|---------|----------|
+| `getAll` | GET | `/debts?page&size&sort` | — | `PaginatedResult<DebtEntryResponse>` |
+| `create` | POST | `/debts` | `CreateDebtEntryRequest` | `DebtEntryResponse` (201) |
+
+---
+
+## 3f. Expense Service — `src/features/expense/services/expenseService.ts`
+
+| Function | Method | BE Endpoint | Request | Response |
+|----------|--------|-------------|---------|----------|
+| `getAll` | GET | `/expenses?page&size&sort` | — | `PaginatedResult<ExpenseResponse>` |
+| `create` | POST | `/expenses` | `CreateExpenseRequest` | `ExpenseResponse` (201) |
+| `cancel` | POST | `/expenses/{id}/cancel` | — | `ExpenseResponse` |
+
+Categories: `cashbookService.listCategories()` → `GET /cashbook/categories`.
+
+---
+
+## 3g. Payslip Service — `src/features/payslip/services/payslipService.ts`
+
+| Function | Method | BE Endpoint | Request | Response |
+|----------|--------|-------------|---------|----------|
+| `getAll` | GET | `/payslips?page&size&sort` | — | `PaginatedResult<PayslipResponse>` |
+| `create` | POST | `/payslips` | `CreatePayslipRequest` | `PayslipResponse` (201 DRAFT) |
+| `confirm` | POST | `/payslips/{id}/confirm` | — | `PayslipResponse` |
+| `pay` | POST | `/payslips/{id}/pay` | — | `PayslipResponse` |
+| `cancel` | POST | `/payslips/{id}/cancel` | — | `PayslipResponse` |
 
 ---
 

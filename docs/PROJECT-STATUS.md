@@ -1,8 +1,6 @@
 # Project Status — Monorepo
 
-> Last updated: 2026-09-02 | Session: #1
->
-> AI: update this file AND the relevant sub-project status at end of session.
+> Last updated: 2026-09-03 | Session: #5
 
 ---
 
@@ -10,43 +8,34 @@
 
 | Part | Stack | Status | Detail |
 |------|-------|--------|--------|
-| **BE** | Spring Boot 4 + MySQL | Phase 0 | `BE/docs/PROJECT-STATUS.md` |
-| **FE** | React 18 + Vite | Phase 0 | `FE/docs/PROJECT-STATUS.md` |
+| **BE** | Spring Boot 4 + MySQL | Role/Permission CRUD done | `BE/docs/PROJECT-STATUS.md` |
+| **FE** | React 18 + Vite | Role/Permission UI | `FE/docs/PROJECT-STATUS.md` |
 
 ---
 
 ## Completed (Monorepo)
-- ✅ Split project into `BE/` + `FE/` folders
-- ✅ BE: Spring Boot skeleton + AI workflow (docs, .cursor/commands)
-- ✅ FE: React + Vite skeleton + AI workflow (docs, .cursor/commands)
-- ✅ Root monorepo config (AGENTS.md, .cursor/commands)
-- ✅ Vite proxy `/api` → BE
-- ✅ BE DB plan: công nợ + công thợ + lương + sổ quỹ (`BE/docs/DATABASE.md`, ADR-003)
+- ✅ BE/FE skeleton, docs, proxy
+- ✅ User / Company / Customer / Cashbook
+- ✅ Worker, Wage, Debt, Expense, Payslip
+- ✅ Auth JWT (login / refresh / RBAC roles)
+- ✅ **Role + Permission CRUD** (BE + FE)
 
 ## In Progress
-_Nothing — both sub-projects at Phase 0 foundation._
+_Nothing._
 
 ## Warnings
-- ⚠️ BE: MySQL chưa cấu hình trong `application.properties`
-- ⚠️ FE: React Router + Vitest chưa cài
+- ⚠️ Permission catalog chưa filter HTTP (chỉ `hasRole` trên JWT)
+- ⚠️ React Router / Vitest chưa cài
 
-## Next Tasks (Recommended Order)
-
-### Backend first (FE depends on API)
-1. **[P0] BE** Foundation — exceptions, ApiResponse, SecurityConfig, JwtConfig
-2. **[P1] BE** Permission + Company CRUD
-3. **[P1] BE** Role → User → Auth flow
-
-### Frontend (after BE endpoints exist)
-4. **[P0] FE** React Router + apiClient + AuthContext
-5. **[P1] FE** Login/Register pages
-6. **[P1] FE** User + Company management UI
+## Next Tasks
+1. Permission request filter (apiPath + method)
+2. React Router
+3. User form: Role dropdown
 
 ## Milestones
 
-- [ ] Phase 0 — BE + FE foundation
-- [ ] Phase 1 — Auth (BE + FE)
-- [ ] Phase 2 — User + Company CRUD (BE + FE)
-- [ ] Phase 3 — Role + Permission + RBAC
-- [ ] Phase 4 — File upload (avatar/logo)
-- [ ] Phase 5 — Polish + full review
+- [x] Phase 0 — BE foundation
+- [x] Phase 2 — Shop ledger entities APIs
+- [x] Phase 1 — Auth
+- [x] Phase 3 — Role + Permission CRUD
+- [ ] Phase 3b — Fine-grained permission filter
