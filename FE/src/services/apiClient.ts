@@ -47,7 +47,11 @@ async function parseResponseBody<T>(
 }
 
 function isAuthPublicPath(path: string) {
-  return path.startsWith('/auth/login') || path.startsWith('/auth/refresh')
+  return (
+    path.startsWith('/auth/login') ||
+    path.startsWith('/auth/refresh') ||
+    path.startsWith('/companies/public')
+  )
 }
 
 async function refreshAccessToken(): Promise<string | null> {

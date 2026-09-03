@@ -24,7 +24,7 @@ setTokenPersister(persistToken)
 interface AuthContextValue {
   user: AuthUser | null
   isReady: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (email: string, password: string, companyId: number) => Promise<void>
   logout: () => Promise<void>
 }
 
@@ -57,8 +57,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [])
 
-  const login = async (email: string, password: string) => {
-    const tokenRes = await authService.login({ email, password })
+  const login = async (email: string, password: string, companyId: number) => {
+    const tokenRes = await authService.login({ email, password, companyId })
     persistToken(tokenRes.data.accessToken)
     const me = await authService.getMe()
     setUser(me.data)

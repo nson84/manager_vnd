@@ -32,3 +32,11 @@ export interface CompanyFormValues {
 }
 
 export type ActiveFilter = '' | 'true' | 'false'
+
+export interface PublicCompany {
+  id: number
+  name: string
+  description?: string | null
+  address?: string | null
+  logo?: string | null
+}

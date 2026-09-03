@@ -79,3 +79,38 @@
   opacity: 0.6;
   cursor: wait;
 }
+
+.login-panel button.login-back {
+  margin-top: 0;
+  background: transparent;
+  color: var(--ink);
+  border-color: var(--line);
+}
+
+.shop-picker {
+  width: min(100%, 440px);
+}
+
+.shop-picker-list {
+  list-style: none;
+  margin: 0.25rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+
+.shop-picker-list button {
+  width: 100%;
+  display: grid;
+  gap: 0.2rem;
+  text-align: left;
+  background: #fff;
+  color: var(--ink);
+  border-color: var(--line);
+  cursor: pointer;
+}
+
+.shop-picker-list button span {
+  font-size: 0.85rem;
+  color: var(--muted);
+}

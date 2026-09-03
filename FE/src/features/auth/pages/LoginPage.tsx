@@ -4,7 +4,13 @@ import { ApiError } from '../../../types/api.types'
 import { useAuth } from '../context/AuthContext'
 import '../components/login.css'
 
-export function LoginPage() {
+interface LoginPageProps {
+  companyId: number
+  companyName: string
+  onBack: () => void
+}
+
+export function LoginPage({ companyId, companyName, onBack }: LoginPageProps) {
   const { login } = useAuth()
   const [email, setEmail] = useState('admin@local.dev')
   const [password, setPassword] = useState('password123')
@@ -16,7 +22,7 @@ export function LoginPage() {
     setIsSubmitting(true)
     setError(null)
     try {
-      await login(email.trim(), password)
+      await login(email.trim(), password, companyId)
     } catch (err) {
       setError(err instanceof ApiError ? err.message : 'Đăng nhập thất bại')
     } finally {
@@ -29,7 +35,7 @@ export function LoginPage() {
       <form className="login-panel" onSubmit={handleSubmit}>
         <p className="login-brand">Manager</p>
         <h1>Đăng nhập</h1>
-        <p className="login-lead">Dùng tài khoản cửa hàng để vào sổ quỹ và nhân sự.</p>
+        <p className="login-lead">{companyName}</p>
         {error && <p className="login-error">{error}</p>}
         <label>
           Email
@@ -53,6 +59,9 @@ export function LoginPage() {
         </label>
         <button type="submit" disabled={isSubmitting}>
           {isSubmitting ? 'Đang vào...' : 'Đăng nhập'}
+        </button>
+        <button type="button" className="login-back" onClick={onBack}>
+          Đổi cửa hàng
         </button>
       </form>
     </main>

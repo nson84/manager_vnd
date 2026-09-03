@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { AuthProvider, LoginPage, useAuth } from '../features/auth'
 import { CashbookPage } from '../features/cashbook'
-import { CompaniesPage } from '../features/company'
+import { CompaniesPage, CompanyPickerPage } from '../features/company'
+import type { PublicCompany } from '../features/company'
 import { CustomersPage } from '../features/customer'
 import { DebtsPage } from '../features/debt'
 import { ExpensesPage } from '../features/expense'
@@ -13,19 +14,19 @@ import { UsersPage } from '../features/user'
 import { WagesPage } from '../features/wage'
 import { WorkersPage } from '../features/worker'
 import '../features/cashbook/components/cashbook.css'
+import { canAccess, defaultView, NAV_ITEMS, roleNames, type AppView } from './nav'
 
-type View =
-  | 'users'
-  | 'companies'
-  | 'roles'
-  | 'permissions'
-  | 'customers'
-  | 'cashbook'
-  | 'workers'
-  | 'wages'
-  | 'debts'
-  | 'expenses'
-  | 'payslips'
+const SHOP_KEY = 'selectedShop'
+
+function readShop(): PublicCompany | null {
+  const raw = sessionStorage.getItem(SHOP_KEY)
+  if (!raw) return null
+  try {
+    return JSON.parse(raw) as PublicCompany
+  } catch {
+    return null
+  }
+}
 
 export function App() {
   return (
@@ -37,98 +38,66 @@ export function App() {
 
 function AppShell() {
   const { user, isReady, logout } = useAuth()
-  const [view, setView] = useState<View>('customers')
+  const [shop, setShop] = useState<PublicCompany | null>(readShop)
+  const roles = user ? roleNames(user.roles) : []
+  const [view, setView] = useState<AppView>(() => defaultView(roles))
+
+  useEffect(() => {
+    if (shop) {
+      sessionStorage.setItem(SHOP_KEY, JSON.stringify(shop))
+      return
+    }
+    sessionStorage.removeItem(SHOP_KEY)
+  }, [shop])
+
+  useEffect(() => {
+    if (user) {
+      setView(defaultView(roleNames(user.roles)))
+      if (!shop && user.company) {
+        setShop({ id: user.company.id, name: user.company.name })
+      }
+    }
+  }, [user, shop])
 
   if (!isReady) {
     return <p className="cashbook-page">Đang kiểm tra phiên...</p>
   }
 
-  if (!user) {
-    return <LoginPage />
+  if (!user && !shop) {
+    return <CompanyPickerPage onSelect={setShop} />
+  }
+
+  if (!user && shop) {
+    return (
+      <LoginPage
+        companyId={shop.id}
+        companyName={shop.name}
+        onBack={() => setShop(null)}
+      />
+    )
+  }
+
+  const handleLogout = async () => {
+    await logout()
+    setShop(null)
   }
 
   return (
     <>
       <div className="cashbook-page" style={{ paddingBottom: 0, minHeight: 0 }}>
         <nav className="cashbook-nav" aria-label="Main">
-          <button
-            type="button"
-            className={view === 'users' ? 'active' : ''}
-            onClick={() => setView('users')}
-          >
-            Users
-          </button>
-          <button
-            type="button"
-            className={view === 'companies' ? 'active' : ''}
-            onClick={() => setView('companies')}
-          >
-            Công ty
-          </button>
-          <button
-            type="button"
-            className={view === 'roles' ? 'active' : ''}
-            onClick={() => setView('roles')}
-          >
-            Role
-          </button>
-          <button
-            type="button"
-            className={view === 'permissions' ? 'active' : ''}
-            onClick={() => setView('permissions')}
-          >
-            Permission
-          </button>
-          <button
-            type="button"
-            className={view === 'customers' ? 'active' : ''}
-            onClick={() => setView('customers')}
-          >
-            Khách hàng
-          </button>
-          <button
-            type="button"
-            className={view === 'workers' ? 'active' : ''}
-            onClick={() => setView('workers')}
-          >
-            Thợ
-          </button>
-          <button
-            type="button"
-            className={view === 'wages' ? 'active' : ''}
-            onClick={() => setView('wages')}
-          >
-            Ghi công
-          </button>
-          <button
-            type="button"
-            className={view === 'debts' ? 'active' : ''}
-            onClick={() => setView('debts')}
-          >
-            Công nợ
-          </button>
-          <button
-            type="button"
-            className={view === 'expenses' ? 'active' : ''}
-            onClick={() => setView('expenses')}
-          >
-            Phiếu chi
-          </button>
-          <button
-            type="button"
-            className={view === 'payslips' ? 'active' : ''}
-            onClick={() => setView('payslips')}
-          >
-            Phiếu lương
-          </button>
-          <button
-            type="button"
-            className={view === 'cashbook' ? 'active' : ''}
-            onClick={() => setView('cashbook')}
-          >
-            Sổ quỹ
-          </button>
-          <button type="button" onClick={() => void logout()}>
+          {shop && <span className="cashbook-shop">{shop.name}</span>}
+          {NAV_ITEMS.filter((item) => canAccess(roles, item.roles)).map((item) => (
+            <button
+              key={item.view}
+              type="button"
+              className={view === item.view ? 'active' : ''}
+              onClick={() => setView(item.view)}
+            >
+              {item.label}
+            </button>
+          ))}
+          <button type="button" onClick={() => void handleLogout()}>
             Đăng xuất
           </button>
         </nav>

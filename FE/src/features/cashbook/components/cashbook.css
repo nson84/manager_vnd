@@ -18,8 +18,16 @@
 
 .cashbook-nav {
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   gap: 0.5rem;
   margin-bottom: 1.25rem;
+}
+
+.cashbook-shop {
+  font-size: 0.85rem;
+  font-weight: 600;
+  margin-right: 0.35rem;
 }
 
 .cashbook-nav button {

@@ -28,7 +28,7 @@ export interface RoleFormValues {
   permissionIds: number[]
 }
 
-export const SYSTEM_ROLE_NAMES = ['ADMIN', 'USER'] as const
+export const SYSTEM_ROLE_NAMES = ['ADMIN', 'MANAGER', 'STAFF', 'USER'] as const
 
 export function isSystemRole(name: string): boolean {
   return SYSTEM_ROLE_NAMES.includes(name.toUpperCase() as (typeof SYSTEM_ROLE_NAMES)[number])

@@ -3,10 +3,13 @@ import type { PaginatedResult } from '../../../types/api.types'
 import type {
   CompanyResponse,
   CreateCompanyRequest,
+  PublicCompany,
   UpdateCompanyRequest,
 } from '../types/company.types'
 
 export const companyService = {
+  listPublic: () => apiClient<PublicCompany[]>('/companies/public'),
+
   getAll: (page = 1, size = 10, sort = 'id,asc', active?: boolean) => {
     const params = new URLSearchParams({
       page: String(page),

@@ -12,6 +12,7 @@ export interface AuthUser {
 }
 
 export interface LoginRequest {
+  companyId: number
   email: string
   password: string
 }

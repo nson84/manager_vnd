@@ -31,7 +31,7 @@ Auth header injected automatically from AuthContext.
 
 | Function | Method | BE Endpoint | Request | Response |
 |----------|--------|-------------|---------|----------|
-| `login` | POST | `/auth/login` | `LoginRequest` | `AuthUser` (session cookie) |
+| `login` | POST | `/auth/login` | `LoginRequest` `{ companyId, email, password }` | `TokenResponse` |
 | `getMe` | GET | `/auth/me` | — | `AuthUser` |
 | `logout` | POST | `/auth/logout` | — | `null` |
 
@@ -75,6 +75,7 @@ Auth header injected automatically from AuthContext.
 
 | Function | Method | BE Endpoint | Request | Response |
 |----------|--------|-------------|---------|----------|
+| `listPublic` | GET | `/companies/public` | — | `PublicCompany[]` |
 | `getAll` | GET | `/companies?page&size&sort&active` | — | `PaginatedResult<CompanyResponse>` |
 | `getById` | GET | `/companies/{id}` | — | `CompanyResponse` |
 | `create` | POST | `/companies` | `CreateCompanyRequest` | `CompanyResponse` (201) |
