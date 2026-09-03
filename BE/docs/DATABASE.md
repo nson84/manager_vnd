@@ -111,11 +111,14 @@ Phase 2 (chưa tạo entity): `products`, `sales`, `sale_items`, `suppliers`, `p
 | address | VARCHAR(255) | NULLABLE | |
 | gender | VARCHAR(20) | NULLABLE | Enum: MALE, FEMALE, OTHER |
 | avatar | VARCHAR(255) | NULLABLE | Avatar image path/URL |
+| is_active | BOOLEAN | NOT NULL, default true | Soft disable — không xóa cứng |
 | company_id | BIGINT | FK → companies(id), NULLABLE | |
 | created_at | TIMESTAMP | NOT NULL | |
 | updated_at | TIMESTAMP | NULLABLE | |
 
-Indexes: `UNIQUE idx_users_email (email)`, `INDEX idx_users_company (company_id)`
+Indexes: `UNIQUE idx_users_email (email)`, `INDEX idx_users_company (company_id)`, `INDEX idx_users_active (is_active)`
+
+**Xóa:** `DELETE /users/{id}` chỉ set `is_active = false` + revoke refresh tokens (không xóa row). Kích hoạt: `POST /users/{id}/enable`.
 
 ### companies
 
@@ -126,14 +129,19 @@ Indexes: `UNIQUE idx_users_email (email)`, `INDEX idx_users_company (company_id)
 | description | TEXT | NULLABLE | |
 | address | VARCHAR(255) | NULLABLE | |
 | logo | VARCHAR(255) | NULLABLE | |
+| is_active | BOOLEAN | NOT NULL, default true | Soft disable — không xóa cứng |
 | created_at / updated_at | TIMESTAMP | | |
+
+Index: `idx_companies_active (is_active)`
+
+**Xóa:** `DELETE /companies/{id}` chỉ set `is_active = false` (không xóa row, không null `users.company_id`). Kích hoạt lại: `POST /companies/{id}/enable`.
 
 ### roles
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | id | BIGINT | PK | |
-| name | VARCHAR(100) | NOT NULL | ADMIN, MANAGER, USER, … |
+| name | VARCHAR(100) | NOT NULL, UNIQUE | ADMIN, MANAGER, USER, … |
 | description | VARCHAR(255) | NULLABLE | |
 | created_at / updated_at | TIMESTAMP | | |
 
@@ -181,6 +189,7 @@ private BigDecimal amount;   // luôn > 0; chiều nằm ở enum direction / en
 ```
 
 ### expense_categories
+8938565145015
 
 Loại thu/chi. Seed cố định cho báo cáo lương / ứng / thu nợ.
 
@@ -218,6 +227,8 @@ Seed `is_system = true`: `WAGE`, `WORKER_ADVANCE`, `CUSTOMER_REPAY`.
 | created_at / updated_at | TIMESTAMP | | |
 
 Indexes: `UNIQUE idx_customers_phone (phone)`
+
+**Xóa:** soft disable (`is_active = false`). Kích hoạt: `POST /customers/{id}/enable`. Không sửa `current_debt` từ CRUD.
 
 ---
 
@@ -390,25 +401,31 @@ POSTED → 1 `cash_entries` OUT cùng `category_id`, `ref_type = EXPENSE`.
 
 ### cash_entries — sổ quỹ (thống kê chi tiêu)
 
-Chỉ service nghiệp vụ insert. Không CRUD tự do từ UI (trừ phiếu MANUAL có kiểm soát).
+Chỉ service nghiệp vụ insert (PAYSLIP, EXPENSE, …). UI sổ quỹ chỉ **tạo MANUAL** + cập nhật note/checked. Chi tiết: `docs/features/cashbook-requirements.md`.
 
 | Column | Type | Constraints | Description |
 |--------|------|-------------|-------------|
 | id | BIGINT | PK | |
-| entry_date | DATE | NOT NULL | |
+| entry_date | DATE | NOT NULL | Ngày nghiệp vụ (theo VN khi tạo từ UI) |
 | direction | VARCHAR(10) | NOT NULL | `IN`, `OUT` |
 | amount | DECIMAL(15,2) | NOT NULL | > 0 |
 | category_id | BIGINT | FK expense_categories, NOT NULL | Trục thống kê |
-| description | VARCHAR(500) | NULLABLE | |
+| description | VARCHAR(500) | NULLABLE | Mô tả chứng từ |
+| note | VARCHAR(500) | NULLABLE | Ghi chú thủ công (UI) |
+| checked | BOOLEAN | NOT NULL, default false | Đã đối chiếu |
+| checked_at | TIMESTAMP | NULLABLE | Thời điểm tick |
+| checked_by | BIGINT | FK users, NULLABLE | Ai tick |
 | ref_type | VARCHAR(30) | NOT NULL | `EXPENSE`, `PAYSLIP`, `WORKER_ADVANCE`, `CUSTOMER_PAYMENT`, `MANUAL` |
 | ref_id | BIGINT | NULLABLE | id chứng từ; MANUAL có thể null |
 | created_by | BIGINT | FK users, NOT NULL | |
-| created_at | TIMESTAMP | NOT NULL | Append-only |
+| created_at | TIMESTAMP | NOT NULL | Append-only create |
+| updated_at | TIMESTAMP | NULLABLE | Khi sửa note/checked |
 
 Indexes:
 - `idx_cash_date (entry_date)`
 - `idx_cash_category_date (category_id, entry_date)`
 - `idx_cash_ref (ref_type, ref_id)`
+- `idx_cash_checked (checked)`
 
 ```java
 @Entity
@@ -417,7 +434,8 @@ Indexes:
     indexes = {
         @Index(name = "idx_cash_date", columnList = "entry_date"),
         @Index(name = "idx_cash_category_date", columnList = "category_id, entry_date"),
-        @Index(name = "idx_cash_ref", columnList = "ref_type, ref_id")
+        @Index(name = "idx_cash_ref", columnList = "ref_type, ref_id"),
+        @Index(name = "idx_cash_checked", columnList = "checked")
     }
 )
 public class CashEntry { /* ... */ }

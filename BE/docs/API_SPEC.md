@@ -23,43 +23,21 @@ except those marked as  **Public**.
 
 ## 1. Auth
 
-### POST /auth/login 
+### POST /auth/login
 
-Login and receive tokens.
+Login: BCrypt + JWT. Trả `accessToken` + `refreshToken`. Cookie HttpOnly `refresh_token` (Path=`/api/v1/auth`, Max-Age=259200).
 
 **Request Body:**
 ```json
 {
-  "email": "admin@example.com",
+  "email": "admin@local.dev",
   "password": "password123"
 }
 ```
 
-**Success Response (200):**
-```json
-{
-  "statusCode": 200,
-  "data": {
-    "accessToken": "eyJ...",
-    "refreshToken": "eyJ..."
-  },
-  "message": "Login successful",
-  "timestamp": "20xx-02-28T10:00:00"
-}
-```
+**Success (200):** `ApiResponse<TokenResponse>` `{ accessToken, refreshToken }`.
 
-**Also sets cookie:**
-```
-Set-Cookie: refresh_token=eyJ...;
-            HttpOnly; Secure; SameSite=Lax;
-            Path=/api/v1/auth; Max-Age=259200
-```
-
-**Errors:**
-| Status | When |
-|--------|------|
-| 400 | Missing email or password |
-| 401 | Invalid credentials |
+**Errors:** 400 validation | 401 sai mật khẩu / tài khoản tắt.
 
 ---
 
@@ -378,22 +356,15 @@ Update an existing user.
 
 ### DELETE /users/{id} 🔒
 
-Delete a user. Also revokes all their refresh tokens.
+**Soft disable** — set `active = false`, revoke refresh tokens, **không xóa** bản ghi.
 
-**Success Response (200):**
-```json
-{
-  "statusCode": 200,
-  "data": null,
-  "message": "User deleted",
-  "timestamp": "20xx-02-28T12:00:00"
-}
-```
+**Success (200):** `ApiResponse` với user `active=false`.
 
-**Errors:**
-| Status | When |
-|--------|------|
-| 404 | User not found |
+**Errors:** 404 | 409 (đã vô hiệu hóa).
+
+### POST /users/{id}/enable 🔒
+
+Kích hoạt lại (`active = true`). **200** | **404** | **409**.
 
 ---
 
@@ -401,143 +372,62 @@ Delete a user. Also revokes all their refresh tokens.
 
 ### GET /companies 🔒
 
-List all companies with pagination.
+List companies with pagination.
 
-**Query Parameters:** same as `/users` (page, size, sort)
+**Query Parameters:** `page`, `size`, `sort`, `active` (optional boolean — lọc đang hoạt động / đã vô hiệu).
 
-**Success Response (200):**
-```json
-{
-  "statusCode": 200,
-  "data": {
-    "meta": { "page": 1, "pageSize": 10, "pages": 2, "total": 15 },
-    "result": [
-      {
-        "id": 1,
-        "name": "HoiDanIT",
-        "description": "Education platform",
-        "address": "Ho Chi Minh City",
-        "logo": "/logos/hoidanit.png",
-        "createdAt": "20xx-01-01T00:00:00Z",
-        "updatedAt": null
-      }
-    ]
-  },
-  "message": "Fetch all companies",
-  "timestamp": "20xx-02-28T10:00:00"
-}
-```
+**Success Response (200):** paginated `CompanyResponse` gồm `active`.
 
 ---
 
 ### GET /companies/{id} 🔒
 
-**Success Response (200):**
-```json
-{
-  "statusCode": 200,
-  "data": {
-    "id": 1,
-    "name": "HoiDanIT",
-    "description": "Education platform",
-    "address": "Ho Chi Minh City",
-    "logo": "/logos/hoidanit.png",
-    "createdAt": "20xx-01-01T00:00:00Z",
-    "updatedAt": null
-  },
-  "message": "Fetch company",
-  "timestamp": "20xx-02-28T10:00:00"
-}
-```
-
-**Errors:**
-| Status | When |
-|--------|------|
-| 404 | Company not found |
+**Success (200):** company detail. **404** nếu không tồn tại.
 
 ---
 
 ### POST /companies 🔒
 
-**Request Body:**
-```json
-{
-  "name": "FPT Software",
-  "description": "IT outsourcing",
-  "address": "Ha Noi",
-  "logo": "/logos/fpt.png"
-}
-```
-
-**Success Response (201):**
-```json
-{
-  "statusCode": 201,
-  "data": {
-    "id": 2,
-    "name": "FPT Software",
-    "description": "IT outsourcing",
-    "address": "Ha Noi",
-    "logo": "/logos/fpt.png",
-    "createdAt": "20xx-02-28T10:00:00Z"
-  },
-  "message": "Company created",
-  "timestamp": "20xx-02-28T10:00:00"
-}
-```
-
-**Errors:**
-| Status | When |
-|--------|------|
-| 400 | Validation failed (blank name) |
+**Request:** `{ "name", "description?", "address?", "logo?" }` → **201** + Location. **400** validation, **409** trùng tên.
 
 ---
 
 ### PUT /companies 🔒
 
-**Request Body:**
-```json
-{
-  "id": 2,
-  "name": "FPT Software Updated",
-  "description": "Technology services",
-  "address": "Da Nang",
-  "logo": "/logos/fpt-new.png"
-}
-```
-
-**Success Response (200):** same structure as POST.
-
-**Errors:**
-| Status | When |
-|--------|------|
-| 400 | Validation failed |
-| 404 | Company not found |
+**Request:** `{ "id", "name?", "description?", "address?", "logo?" }` → **200**. **404** / **409** trùng tên.
 
 ---
 
 ### DELETE /companies/{id} 🔒
 
-**Success Response (200):**
+**Soft disable** — set `active = false`, **không xóa** bản ghi, **không** null `users.company_id`.
+
+**Success (200):**
 ```json
 {
   "statusCode": 200,
-  "data": null,
-  "message": "Company deleted",
-  "timestamp": "20xx-02-28T12:00:00"
+  "data": { "id": 2, "name": "...", "active": false },
+  "message": "Vô hiệu hóa công ty thành công"
 }
 ```
 
-**Errors:**
-| Status | When |
-|--------|------|
-| 404 | Company not found |
+**Errors:** 404 | 409 (đã bị vô hiệu hóa).
 
-**Note:** Deleting a company sets `company_id = null` on all associated users (does NOT delete users).
+---
+
+### POST /companies/{id}/enable 🔒
+
+Kích hoạt lại (`active = true`). **200** | **404** | **409** (đã active).
 
 ---
 
 ## 4. Roles
+
+**ADMIN only.**
+
+Pagination: `page` (1-based), `size`, `sort` (`id,asc`).
+
+`ADMIN` / `USER` are system roles (seeder): cannot rename or delete.
 
 ### GET /roles 🔒
 
@@ -618,6 +508,7 @@ List all roles with pagination.
 |--------|------|
 | 400 | Validation failed (blank name) |
 | 404 | One or more Permission IDs not found |
+| 409 | Duplicate role name |
 
 ---
 
@@ -642,6 +533,7 @@ List all roles with pagination.
 |--------|------|
 | 400 | Validation failed |
 | 404 | Role or Permission not found |
+| 409 | Duplicate role name, or rename of system role ADMIN/USER |
 
 ---
 
@@ -657,16 +549,21 @@ List all roles with pagination.
 }
 ```
 
-**Note:** Also removes this role from all users who had it (clears join table entries).
+**Note:** Also removes this role from all users who had it (clears join table entries). System roles `ADMIN` / `USER` cannot be deleted.
 
 **Errors:**
 | Status | When |
 |--------|------|
 | 404 | Role not found |
+| 409 | System role ADMIN/USER cannot be deleted |
 
 ---
 
 ## 5. Permissions
+
+**ADMIN only.**
+
+Pagination: `page` (1-based), `size`, `sort`. Unique `(apiPath, method)`.
 
 ### GET /permissions 🔒
 
@@ -888,21 +785,22 @@ Upload a single file to the server. The returned `fileName` is then used to upda
 
 | Method | Endpoint | Auth | Description |
 |--------|----------|------|-------------|
-| POST | /auth/login | 🔓 | Login |
-| POST | /auth/register | 🔓 | Register |
-| POST | /auth/refresh | 🔓 | Refresh token |
-| POST | /auth/logout | 🔒 | Logout |
-| GET | /auth/me | 🔒 | Current user info |
+| POST | /auth/login | 🔓 | Login (access + refresh cookie) |
+| POST | /auth/refresh | 🔓 | Rotate refresh (cookie or body) |
+| GET | /auth/me | 🔒 | Current user |
+| POST | /auth/logout | 🔒 | Logout (revoke + clear cookie) |
 | GET | /users | 🔒 | List users |
 | GET | /users/{id} | 🔒 | Get user |
 | POST | /users | 🔒 | Create user |
 | PUT | /users | 🔒 | Update user |
-| DELETE | /users/{id} | 🔒 | Delete user |
+| DELETE | /users/{id} | 🔒 | Soft disable user |
+| POST | /users/{id}/enable | 🔒 | Re-enable user |
 | GET | /companies | 🔒 | List companies |
 | GET | /companies/{id} | 🔒 | Get company |
 | POST | /companies | 🔒 | Create company |
 | PUT | /companies | 🔒 | Update company |
-| DELETE | /companies/{id} | 🔒 | Delete company |
+| DELETE | /companies/{id} | 🔒 | Soft disable company |
+| POST | /companies/{id}/enable | 🔒 | Re-enable company |
 | GET | /roles | 🔒 | List roles |
 | GET | /roles/{id} | 🔒 | Get role |
 | POST | /roles | 🔒 | Create role |
@@ -914,3 +812,181 @@ Upload a single file to the server. The returned `fileName` is then used to upda
 | PUT | /permissions | 🔒 | Update permission |
 | DELETE | /permissions/{id} | 🔒 | Delete permission |
 | POST | /files | 🔒 | Upload file (avatar / logo) |
+| GET | /cashbook | 🔒 | List cash entries (filter) |
+| GET | /cashbook/stats | 🔒 | Cashbook stats |
+| GET | /cashbook/categories | 🔒 | Expense categories for filter |
+| GET | /cashbook/export/pdf | 🔒 | Export PDF |
+| GET | /cashbook/{id} | 🔒 | Cash entry detail |
+| POST | /cashbook | 🔒 | Create MANUAL entry (201) |
+| PATCH | /cashbook/{id}/note | 🔒 | Update note |
+| PATCH | /cashbook/{id}/checked | 🔒 | Toggle reconciled |
+| DELETE | /cashbook/{id} | 🔒 | Delete MANUAL (204) |
+| GET | /customers | 🔒 | List customers |
+| GET | /customers/{id} | 🔒 | Get customer |
+| POST | /customers | 🔒 | Create customer |
+| PUT | /customers | 🔒 | Update customer |
+| DELETE | /customers/{id} | 🔒 | Soft disable customer |
+| POST | /customers/{id}/enable | 🔒 | Re-enable customer |
+| GET | /workers | 🔒 | List workers |
+| GET | /workers/{id} | 🔒 | Get worker |
+| POST | /workers | 🔒 | Create worker |
+| PUT | /workers | 🔒 | Update worker |
+| DELETE | /workers/{id} | 🔒 | Soft disable worker |
+| POST | /workers/{id}/enable | 🔒 | Re-enable worker |
+| GET | /wages | 🔒 | List wage entries |
+| POST | /wages | 🔒 | Create wage entry |
+| PUT | /wages | 🔒 | Update unpaid wage |
+| DELETE | /wages/{id} | 🔒 | Delete unpaid wage (204) |
+| GET | /debts | 🔒 | List debt entries |
+| POST | /debts | 🔒 | Create debt entry |
+| GET | /expenses | 🔒 | List expenses |
+| POST | /expenses | 🔒 | Create expense |
+| POST | /expenses/{id}/cancel | 🔒 | Cancel expense |
+| GET | /payslips | 🔒 | List payslips |
+| POST | /payslips | 🔒 | Create DRAFT payslip |
+| PUT | /payslips | 🔒 | Update DRAFT |
+| POST | /payslips/{id}/confirm | 🔒 | Confirm |
+| POST | /payslips/{id}/pay | 🔒 | Pay + ledger |
+| POST | /payslips/{id}/cancel | 🔒 | Cancel |
+
+---
+
+## 9. Cashbook (Sổ quỹ)
+
+Base path: `/api/v1/cashbook`. Timezone mặc định filter: `Asia/Ho_Chi_Minh`. Chi tiết: `docs/features/cashbook-requirements.md`.
+
+### GET /cashbook
+
+Query: `page`, `size`, `sort`, `fromDate`, `toDate`, `direction`, `categoryId`, `refType`, `refId`, `createdBy`, `checked`, `amountMin`, `amountMax`, `q`.
+
+**Success (200):** `ApiResponse<PaginatedResult<CashEntryResponse>>`.
+
+### GET /cashbook/stats
+
+Cùng filter ngày/loại… — trả `totalIn`, `totalOut`, `balance`, `countIn`, `countOut`, `byCategory[]`.
+
+### GET /cashbook/export/pdf
+
+Cùng filter — `Content-Type: application/pdf`.
+
+### POST /cashbook
+
+Body: `{ entryDate?, direction, amount, categoryId, description?, note? }` → **201** MANUAL.
+
+### PATCH /cashbook/{id}/note | /checked
+
+Cập nhật ghi chú / đối chiếu → **200**.
+
+### DELETE /cashbook/{id}
+
+Chỉ MANUAL → **204**; dòng hệ thống → **409**.
+
+---
+
+## 10. Customers
+
+Base path: `/api/v1/customers`. Soft disable (`is_active`). `currentDebt` chỉ đọc.
+
+### GET /customers
+
+Query: `page`, `size`, `sort`, `active`, `q` (name/phone/note/address).
+
+**200:** `PaginatedResult<CustomerResponse>`.
+
+### GET /customers/{id}
+
+**200** | **404**.
+
+### POST /customers
+
+Body: `{ name, phone?, address?, note? }` → **201**. Phone unique nếu có. `currentDebt = 0`.
+
+### PUT /customers
+
+Body: `{ id, name?, phone?, address?, note? }` → **200**.
+
+### DELETE /customers/{id}
+
+Soft disable → **200** + `active=false`. **409** nếu đã tắt.
+
+### POST /customers/{id}/enable
+
+**200** + `active=true`.
+
+---
+
+## 11. Workers
+
+Base path: `/api/v1/workers`. Soft disable. `currentAdvance` chỉ đọc.
+
+### GET /workers
+Query: `page`, `size`, `sort`, `active`, `q`.
+
+### POST /workers
+Body: `{ name, phone?, address?, jobTitle?, wageType, defaultUnitRate, hireDate?, note? }` → **201**.
+
+### PUT /workers
+Body: `{ id, name?, phone?, address?, jobTitle?, wageType?, defaultUnitRate?, hireDate?, note? }`.
+
+### DELETE /workers/{id} | POST /workers/{id}/enable
+Soft disable / enable.
+
+---
+
+## 12. Wages (WageEntry)
+
+Base path: `/api/v1/wages`. Không tạo CashEntry. `amount = quantity × unitRate`.
+
+### GET /wages
+Query: `workerId`, `fromDate`, `toDate`, `unpaidOnly`.
+
+### POST /wages
+Body: `{ workerId, workDate, wageType?, quantity, unitRate?, note? }` → **201**.
+
+### PUT /wages
+Chỉ khi chưa gắn payslip. Body: `{ id, workDate?, wageType?, quantity?, unitRate?, note? }`.
+
+### DELETE /wages/{id}
+**204** nếu chưa gắn payslip; **409** nếu đã gắn.
+
+---
+
+## 13. Debts (DebtEntry)
+
+Base path: `/api/v1/debts`. Append-only (không PUT/DELETE).
+
+### GET /debts
+Query: `customerId`, `workerId`, `fromDate`, `toDate`, `entryType`.
+
+### POST /debts
+Body: `{ customerId?, workerId?, entryType, direction?, amount, entryDate, note? }` → **201**.
+XOR đúng 1 trong customer/worker. CHARGE→INCREASE, PAYMENT→DECREASE, ADJUST cần `direction`.
+Auto CashEntry: customer PAYMENT → IN `CUSTOMER_REPAY`; worker CHARGE → OUT `WORKER_ADVANCE`.
+
+---
+
+## 14. Expenses
+
+Base path: `/api/v1/expenses`.
+
+### POST /expenses
+Body: `{ categoryId, amount, expenseDate, note? }` → **201** POSTED + CashEntry OUT. Cấm category `WAGE`.
+
+### POST /expenses/{id}/cancel
+CANCELLED + CashEntry IN đảo.
+
+---
+
+## 15. Payslips
+
+Base path: `/api/v1/payslips`.
+
+### POST /payslips
+Body: `{ workerId, periodStart, periodEnd, advanceDeducted?, otherDeduction?, note? }` → **201** DRAFT.
+Gộp wage chưa quyết toán trong kỳ; `net = gross − advance − other`.
+
+### PUT /payslips
+Chỉ DRAFT: `{ id, advanceDeducted?, otherDeduction?, note? }`.
+
+### POST /payslips/{id}/confirm | /pay | /cancel
+Confirm → CONFIRMED. Pay → PAID + CashEntry OUT `WAGE` + Debt PAYMENT trừ ứng. Cancel: gỡ wage; nếu đã PAID thì đảo quỹ + hoàn ứng.
