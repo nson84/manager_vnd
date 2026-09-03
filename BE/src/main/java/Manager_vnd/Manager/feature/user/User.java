@@ -36,7 +36,8 @@ import jakarta.persistence.Table;
         name = "users",
         indexes = {
                 @Index(name = "idx_users_email", columnList = "email", unique = true),
-                @Index(name = "idx_users_company", columnList = "company_id")
+                @Index(name = "idx_users_company", columnList = "company_id"),
+                @Index(name = "idx_users_active", columnList = "is_active")
         }
 )
 public class User {
@@ -65,6 +66,9 @@ public class User {
 
     @Column(length = 255)
     private String avatar;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id")
@@ -169,6 +173,14 @@ public class User {
 
     public void setAvatar(String avatar) {
         this.avatar = avatar;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public Company getCompany() {
