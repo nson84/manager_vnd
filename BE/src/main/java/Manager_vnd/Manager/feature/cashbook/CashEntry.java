@@ -5,6 +5,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
 import Manager_vnd.Manager.feature.expense.ExpenseCategory;
 import Manager_vnd.Manager.feature.user.User;
@@ -27,7 +28,8 @@ import jakarta.persistence.Table;
         indexes = {
                 @Index(name = "idx_cash_date", columnList = "entry_date"),
                 @Index(name = "idx_cash_category_date", columnList = "category_id, entry_date"),
-                @Index(name = "idx_cash_ref", columnList = "ref_type, ref_id")
+                @Index(name = "idx_cash_ref", columnList = "ref_type, ref_id"),
+                @Index(name = "idx_cash_checked", columnList = "checked")
         }
 )
 public class CashEntry {
@@ -53,6 +55,19 @@ public class CashEntry {
     @Column(length = 500)
     private String description;
 
+    @Column(length = 500)
+    private String note;
+
+    @Column(nullable = false)
+    private boolean checked = false;
+
+    @Column(name = "checked_at")
+    private Instant checkedAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "checked_by")
+    private User checkedBy;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "ref_type", nullable = false, length = 30)
     private CashRefType refType;
@@ -67,6 +82,10 @@ public class CashEntry {
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private Instant updatedAt;
 
     public CashEntry() {
     }
@@ -119,6 +138,38 @@ public class CashEntry {
         this.description = description;
     }
 
+    public String getNote() {
+        return note;
+    }
+
+    public void setNote(String note) {
+        this.note = note;
+    }
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
+    }
+
+    public Instant getCheckedAt() {
+        return checkedAt;
+    }
+
+    public void setCheckedAt(Instant checkedAt) {
+        this.checkedAt = checkedAt;
+    }
+
+    public User getCheckedBy() {
+        return checkedBy;
+    }
+
+    public void setCheckedBy(User checkedBy) {
+        this.checkedBy = checkedBy;
+    }
+
     public CashRefType getRefType() {
         return refType;
     }
@@ -145,5 +196,9 @@ public class CashEntry {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public Instant getUpdatedAt() {
+        return updatedAt;
     }
 }
