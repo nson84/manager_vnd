@@ -116,13 +116,21 @@ public class SecurityConfig {
                         .requestMatchers("/", "/auth/login", "/auth/refresh").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/auth/login", "/api/v1/auth/refresh")
                         .permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/companies/public")
+                        .permitAll()
                         .requestMatchers(
                                 "/api/v1/users/**",
                                 "/api/v1/companies/**",
                                 "/api/v1/roles/**",
                                 "/api/v1/permissions/**")
                         .hasRole("ADMIN")
-                        .requestMatchers("/api/v1/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers(
+                                "/api/v1/cashbook/**",
+                                "/api/v1/expenses/**",
+                                "/api/v1/payslips/**")
+                        .hasAnyRole("MANAGER", "ADMIN")
+                        .requestMatchers("/api/v1/**")
+                        .hasAnyRole("STAFF", "USER", "MANAGER", "ADMIN")
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter)))

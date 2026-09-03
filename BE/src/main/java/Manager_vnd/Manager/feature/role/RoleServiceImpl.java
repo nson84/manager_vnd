@@ -27,7 +27,7 @@ import Manager_vnd.Manager.feature.user.UserRepository;
 @Service
 public class RoleServiceImpl implements RoleService {
 
-    private static final Set<String> SYSTEM_ROLE_NAMES = Set.of("ADMIN", "USER");
+    private static final Set<String> SYSTEM_ROLE_NAMES = Set.of("ADMIN", "MANAGER", "STAFF", "USER");
 
     private final RoleRepository roleRepository;
     private final PermissionRepository permissionRepository;

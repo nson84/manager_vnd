@@ -16,6 +16,7 @@ import Manager_vnd.Manager.exception.InvalidRequestException;
 import Manager_vnd.Manager.exception.ResourceNotFoundException;
 import Manager_vnd.Manager.feature.company.dto.CompanyResponse;
 import Manager_vnd.Manager.feature.company.dto.CreateCompanyRequest;
+import Manager_vnd.Manager.feature.company.dto.PublicCompanyResponse;
 import Manager_vnd.Manager.feature.company.dto.UpdateCompanyRequest;
 
 @Service
@@ -25,6 +26,14 @@ public class CompanyServiceImpl implements CompanyService {
 
     public CompanyServiceImpl(CompanyRepository companyRepository) {
         this.companyRepository = companyRepository;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<PublicCompanyResponse> listPublic() {
+        return companyRepository.findByActiveTrueOrderByNameAsc().stream()
+                .map(PublicCompanyResponse::fromEntity)
+                .toList();
     }
 
     @Override

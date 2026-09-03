@@ -22,8 +22,10 @@ public class RoleSeeder implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        seed("ADMIN", "Quản trị hệ thống");
-        seed("USER", "Nhân viên cửa hàng");
+        seed("ADMIN", "Chủ hệ thống — đầy đủ tính năng");
+        seed("MANAGER", "Quản lý cửa hàng — sổ quỹ, lương, phiếu chi");
+        seed("STAFF", "Nhân viên — ghi công, khách, công nợ");
+        seed("USER", "Nhân viên cửa hàng (cũ, cùng quyền STAFF)");
     }
 
     private void seed(String name, String description) {

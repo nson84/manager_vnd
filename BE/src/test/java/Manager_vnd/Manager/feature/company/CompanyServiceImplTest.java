@@ -142,4 +142,19 @@ class CompanyServiceImplTest {
         assertEquals(1, result.result().size());
         assertTrue(result.result().get(0).active());
     }
+
+    @Test
+    @DisplayName("Danh sách public chỉ cửa hàng đang hoạt động")
+    void listPublic_returnsActiveShops() {
+        Company company = new Company();
+        company.setId(1L);
+        company.setName("Tạp Hóa Phúc Sơn");
+        company.setActive(true);
+        when(companyRepository.findByActiveTrueOrderByNameAsc()).thenReturn(List.of(company));
+
+        var result = companyService.listPublic();
+
+        assertEquals(1, result.size());
+        assertEquals("Tạp Hóa Phúc Sơn", result.get(0).name());
+    }
 }

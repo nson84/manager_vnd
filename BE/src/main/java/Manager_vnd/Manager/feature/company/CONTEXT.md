@@ -8,6 +8,7 @@ CRUD công ty. **Không xóa cứng** — `DELETE` set `is_active = false`. Kíc
 
 | Method | Path | Notes |
 |--------|------|-------|
+| GET | `/api/v1/companies/public` | Public — cửa hàng đang active (chọn trước login) |
 | GET | `/api/v1/companies` | `active` filter optional |
 | GET | `/api/v1/companies/{id}` | |
 | POST | `/api/v1/companies` | 201 |

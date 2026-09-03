@@ -30,14 +30,15 @@ Login: BCrypt + JWT. Trả `accessToken` + `refreshToken`. Cookie HttpOnly `refr
 **Request Body:**
 ```json
 {
+  "companyId": 1,
   "email": "admin@local.dev",
   "password": "password123"
 }
 ```
 
-**Success (200):** `ApiResponse<TokenResponse>` `{ accessToken, refreshToken }`.
+**Success (200):** `ApiResponse<TokenResponse>` `{ accessToken, refreshToken }`. Access JWT có `roles` + `companyId`.
 
-**Errors:** 400 validation | 401 sai mật khẩu / tài khoản tắt.
+**Errors:** 400 validation | 401 sai mật khẩu / tài khoản tắt | 403 không thuộc cửa hàng | 404 cửa hàng không tồn tại.
 
 ---
 
@@ -369,6 +370,12 @@ Kích hoạt lại (`active = true`). **200** | **404** | **409**.
 ---
 
 ## 3. Companies
+
+### GET /companies/public 🌐 Public
+
+List cửa hàng `active=true` để chọn trước login. `{ id, name, description, address, logo }`.
+
+---
 
 ### GET /companies 🔒
 

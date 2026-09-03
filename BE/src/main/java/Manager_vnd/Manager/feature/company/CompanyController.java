@@ -1,6 +1,7 @@
 package Manager_vnd.Manager.feature.company;
 
 import java.net.URI;
+import java.util.List;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +19,7 @@ import Manager_vnd.Manager.dto.ApiResponse;
 import Manager_vnd.Manager.dto.PaginatedResult;
 import Manager_vnd.Manager.feature.company.dto.CompanyResponse;
 import Manager_vnd.Manager.feature.company.dto.CreateCompanyRequest;
+import Manager_vnd.Manager.feature.company.dto.PublicCompanyResponse;
 import Manager_vnd.Manager.feature.company.dto.UpdateCompanyRequest;
 import jakarta.validation.Valid;
 
@@ -30,6 +32,14 @@ public class CompanyController {
 
     public CompanyController(CompanyService companyService) {
         this.companyService = companyService;
+    }
+
+    @GetMapping("/public")
+    @PreAuthorize("permitAll()")
+    public ResponseEntity<ApiResponse<List<PublicCompanyResponse>>> listPublic() {
+        return ResponseEntity.ok(ApiResponse.success(
+                "Lấy danh sách cửa hàng thành công",
+                companyService.listPublic()));
     }
 
     @GetMapping
