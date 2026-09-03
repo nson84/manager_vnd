@@ -1,0 +1,149 @@
+.users-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 1.5rem;
+}
+
+.users-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.users-header h1 {
+  margin-bottom: 0.25rem;
+}
+
+.user-muted {
+  color: #6b7280;
+  font-size: 0.875rem;
+}
+
+.user-error {
+  color: #b91c1c;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.user-table-wrap {
+  overflow-x: auto;
+  margin-top: 1rem;
+}
+
+.user-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.user-table th,
+.user-table td {
+  border: 1px solid var(--border);
+  padding: 0.625rem 0.75rem;
+  text-align: left;
+}
+
+.user-table th {
+  background: #f9fafb;
+  font-weight: 600;
+}
+
+.user-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.user-actions button,
+.users-header button,
+.users-pagination button,
+.user-form-actions button {
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 6px;
+  padding: 0.375rem 0.75rem;
+  cursor: pointer;
+  font: inherit;
+}
+
+.user-actions button:hover,
+.users-header button:hover,
+.users-pagination button:hover:not(:disabled),
+.user-form-actions button:hover:not(:disabled) {
+  background: #f3f4f6;
+}
+
+.user-btn-danger {
+  color: #b91c1c;
+  border-color: #fecaca !important;
+}
+
+.users-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.users-pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.user-form {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  background: #f9fafb;
+}
+
+.user-form h2 {
+  margin: 0 0 0.25rem;
+  font-size: 1.125rem;
+}
+
+.user-form label {
+  display: grid;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.user-form input,
+.user-form select {
+  font: inherit;
+  padding: 0.5rem 0.625rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: #fff;
+}
+
+.user-form input:disabled {
+  background: #f3f4f6;
+  color: #6b7280;
+}
+
+.user-form-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.user-form-actions button[type='submit'] {
+  background: #111827;
+  color: #fff;
+  border-color: #111827;
+}
+
+.user-form-actions button[type='submit']:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
