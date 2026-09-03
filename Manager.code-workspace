@@ -1,0 +1,32 @@
+{
+  "folders": [
+    {
+      "name": "📦 Manager",
+      "path": "."
+    },
+    {
+      "name": "☕ BE (Spring Boot)",
+      "path": "BE"
+    },
+    {
+      "name": "⚛️ FE (React)",
+      "path": "FE"
+    }
+  ],
+  "settings": {
+    "java.configuration.updateBuildConfiguration": "automatic",
+    "java.import.maven.enabled": true,
+    "maven.executable.preferMavenWrapper": true,
+    "files.exclude": {
+      "**/FE/node_modules": true,
+      "**/FE/dist": true,
+      "**/BE/target": true
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "vscjava.vscode-java-pack",
+      "vmware.vscode-boot-dev-pack"
+    ]
+  }
+}

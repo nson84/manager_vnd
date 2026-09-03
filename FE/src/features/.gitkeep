@@ -1,0 +1,2 @@
+// Feature modules — auth, user, company, role, permission, file
+// Each feature: components/, hooks/, services/, types/, pages/, CONTEXT.md

@@ -1,0 +1,22 @@
+---
+description: Manager FE project entry point — read AGENTS.md and docs before coding
+alwaysApply: true
+---
+
+# Manager Frontend — AI Context
+
+Before writing or modifying code, read:
+
+1. `AGENTS.md` — project overview and doc references
+2. `docs/PROJECT-STATUS.md` — current progress and next tasks
+3. `docs/PROJECT-RULES.md` — coding conventions (when implementing code)
+
+Use Cursor slash commands in `.cursor/commands/`:
+- `/start` — begin session, read context
+- `/new-feature` — scaffold new feature module
+- `/write-tests` — write tests for existing module
+- `/write-context` — create CONTEXT.md for a feature
+- `/review-pr` — review code before commit
+- `/update-status` — update PROJECT-STATUS.md at end of session
+
+Stack: React 18 + TypeScript + Vite. API base: `/api/v1`.

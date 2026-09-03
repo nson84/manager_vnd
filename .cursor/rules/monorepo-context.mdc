@@ -1,0 +1,24 @@
+---
+description: Manager monorepo — read AGENTS.md before coding BE or FE
+alwaysApply: true
+---
+
+# Manager Monorepo — AI Context
+
+This workspace contains **BE/** (Spring Boot) and **FE/** (React).
+
+Before coding:
+1. Read `AGENTS.md` — choose BE or FE based on task
+2. Read `docs/PROJECT-STATUS.md` — overall progress
+3. Read sub-project rules:
+   - BE → `BE/docs/PROJECT-RULES.md`
+   - FE → `FE/docs/PROJECT-RULES.md`
+
+Slash commands (root `.cursor/commands/`):
+- `/start` — begin session
+- `/new-feature-be` / `/new-feature-fe` — new feature
+- `/write-tests-be` / `/write-tests-fe` — write tests
+- `/review-pr` — code review
+- `/update-status` — update status docs
+
+When task spans both stacks, keep BE API_SPEC and FE DATA_MODEL in sync.
