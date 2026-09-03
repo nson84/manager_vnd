@@ -14,11 +14,15 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 @Entity
-@Table(name = "companies")
+@Table(
+        name = "companies",
+        indexes = @Index(name = "idx_companies_active", columnList = "is_active")
+)
 public class Company {
 
     @Id
@@ -36,6 +40,9 @@ public class Company {
 
     @Column(length = 255)
     private String logo;
+
+    @Column(name = "is_active", nullable = false)
+    private boolean active = true;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -89,6 +96,14 @@ public class Company {
 
     public void setLogo(String logo) {
         this.logo = logo;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public Instant getCreatedAt() {
